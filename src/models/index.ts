@@ -11,3 +11,5 @@ export * from './teacherAssignment.model';
 export * from './attendancePolicy.model';
 export * from './attendanceSession.model';
 export * from './attendanceRecord.model';
+export * from './assignment.model';
+export * from './assignmentSubmission.model';
