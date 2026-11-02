@@ -13,3 +13,8 @@ export * from './attendanceSession.model';
 export * from './attendanceRecord.model';
 export * from './assignment.model';
 export * from './assignmentSubmission.model';
+export * from './examination.model';
+export * from './examinationSchedule.model';
+export * from './gradingPolicy.model';
+export * from './examinationResult.model';
+export * from './questionAssessment.model';
