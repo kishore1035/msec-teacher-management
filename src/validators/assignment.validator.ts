@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Types } from 'mongoose';
 
-const objectIdSchema = z.string().refine((val) => Types.ObjectId.isValid(val), {
+export const objectIdSchema = z.string().refine((val) => Types.ObjectId.isValid(val), {
   message: 'Invalid MongoDB ObjectId',
 });
 
@@ -107,4 +107,37 @@ export const analyticsQuerySchema = z.object({
   assignment: objectIdSchema.optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
+});
+
+// Middleware request validators
+export const createAssignmentValidator = z.object({
+  body: createAssignmentSchema,
+});
+
+export const updateAssignmentValidator = z.object({
+  params: z.object({ id: objectIdSchema }),
+  body: updateAssignmentSchema,
+});
+
+export const assignmentQueryValidator = z.object({
+  query: assignmentQuerySchema,
+});
+
+export const submitAssignmentValidator = z.object({
+  params: z.object({ assignmentId: objectIdSchema }),
+  body: submitAssignmentSchema,
+});
+
+export const evaluateSubmissionValidator = z.object({
+  params: z.object({ submissionId: objectIdSchema }),
+  body: evaluateSubmissionSchema,
+});
+
+export const returnSubmissionValidator = z.object({
+  params: z.object({ submissionId: objectIdSchema }),
+  body: returnSubmissionSchema,
+});
+
+export const analyticsQueryValidator = z.object({
+  query: analyticsQuerySchema,
 });

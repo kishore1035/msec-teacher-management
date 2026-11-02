@@ -8,6 +8,7 @@ import { subjectRouter } from './subject.routes';
 import { teacherAssignmentRouter } from './teacherAssignment.routes';
 import { teacherRouter } from './teacher.routes';
 import { attendanceRouter } from './attendance.routes';
+import { assignmentRouter, submissionRouter, attachmentRouter } from './assignment.routes';
 
 const router = Router();
 
@@ -28,5 +29,8 @@ router.use('/subjects', subjectRouter);
 router.use('/teacher-assignments', teacherAssignmentRouter);
 router.use('/teachers', teacherRouter);
 router.use('/attendance', attendanceRouter);
+router.use('/assignments', assignmentRouter);
+router.use('/submissions', submissionRouter);
+router.use('/attachments', attachmentRouter);
 
 export const apiRouter = router;
