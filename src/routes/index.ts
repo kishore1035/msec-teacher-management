@@ -7,6 +7,7 @@ import { sectionRouter } from './section.routes';
 import { subjectRouter } from './subject.routes';
 import { teacherAssignmentRouter } from './teacherAssignment.routes';
 import { teacherRouter } from './teacher.routes';
+import { attendanceRouter } from './attendance.routes';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/sections', sectionRouter);
 router.use('/subjects', subjectRouter);
 router.use('/teacher-assignments', teacherAssignmentRouter);
 router.use('/teachers', teacherRouter);
+router.use('/attendance', attendanceRouter);
 
 export const apiRouter = router;
