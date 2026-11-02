@@ -34,6 +34,15 @@ Enterprise modular backend for the Teacher Management System at educational inst
 - **Shortage Detection:** Automated identification of students with $<75\%$ shortage and $75\%-85\%$ warning flags.
 - **Comprehensive Reports:** Class-wise, subject-wise, student-wise, daily, monthly, and date-range attendance matrices.
 
+### Phase 4: Assignment & Submission Management
+- **Assignment Lifecycle:** Draft creation, section publication, closing, and archiving with teacher-assignment authorization guards.
+- **Storage Abstraction & Secure Uploads:** Multer file validation (PDF, DOC/DOCX, PPT/PPTX, XLS/XLSX, TXT, ZIP, Images up to 25MB) with path-traversal prevention.
+- **Student Submissions:** Rich text + file attachments, deadline enforcement, grace period late flagging (`isLate = true`).
+- **Resubmission Management:** Controlled revision attempts (`maxResubmissions`) with versioned attempt tracking.
+- **Evaluation & Grading Audit Trail:** Marks verification within bounds (`0 <= marksObtained <= totalMarks`), written feedback, return for revisions, and immutable re-evaluation audit logs.
+- **Assignment Analytics Engine:** Aggregated overview counters (completion rate, average marks, late submissions), class-wise, subject-wise, and individual student progress metrics.
+- **Protected File Streaming:** Secure attachment access at `/api/v1/attachments/:attachmentId` verifying role and enrollment boundaries.
+
 ---
 
 ## Getting Started

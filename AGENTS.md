@@ -49,6 +49,7 @@ src/
 | **Phase 1** | Authentication & RBAC | `User` | `/api/v1/auth/*` |
 | **Phase 2** | Academic Core & Classes | `AcademicYear`, `Department`, `Class`, `Section`, `Subject`, `Teacher`, `TeacherAssignment` | `/api/v1/academics/*`, `/api/v1/departments/*`, `/api/v1/classes/*`, `/api/v1/sections/*`, `/api/v1/subjects/*`, `/api/v1/teacher-assignments/*`, `/api/v1/teachers/me/*` |
 | **Phase 3** | Attendance & Shortages | `AttendanceSession`, `AttendanceRecord`, `AttendancePolicy`, `Student`, `Parent` | `/api/v1/attendance/*` |
+| **Phase 4** | Assignment & Submissions | `Assignment`, `AssignmentSubmission` | `/api/v1/assignments/*`, `/api/v1/submissions/*`, `/api/v1/attachments/*` |
 
 ---
 
@@ -72,7 +73,17 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 5. Development & Testing Commands
+## 5. Assignment Lifecycle & Storage Architecture
+
+- **Lifecycle:** `draft` -> `published` -> `closed` -> `archived`. Draft assignments are strictly hidden from students.
+- **Storage Abstraction:** File binaries are stored securely via `IStorageService` on disk (or S3/GCS in prod); only metadata and relative paths are preserved in MongoDB.
+- **Path Traversal Defense:** All attachment streams and file paths are sanitized and resolved strictly within the root upload path.
+- **Late Rules & Deadlines:** Submissions after `dueDate` are rejected unless `allowLateSubmission` is active; valid grace submissions are flagged with `isLate: true`.
+- **Evaluation Audit Trail:** Every grade modification records the previous marks, new marks, evaluator ID, timestamp, and mandatory change reason.
+
+---
+
+## 6. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -94,8 +105,8 @@ npm start
 
 ---
 
-## 6. Contribution Standards for Future Phases
+## 7. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, or Phase 3 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, or Phase 4 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.
