@@ -20,3 +20,5 @@ export * from './examinationResult.model';
 export * from './questionAssessment.model';
 export * from './riskRule.model';
 export * from './studentProgress.model';
+export * from './studyMaterial.model';
+export * from './studyMaterialVersion.model';
