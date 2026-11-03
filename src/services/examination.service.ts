@@ -104,7 +104,7 @@ export class ExaminationService {
       const section = await Section.findById(data.section);
       if (!section) throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Section not found');
       if (section.semester !== data.semester) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Section semester does not match exam semester');
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Semester mismatch: Section semester does not match exam semester');
       }
     }
 
@@ -112,7 +112,7 @@ export class ExaminationService {
       const subject = await Subject.findById(data.subject);
       if (!subject) throw new ApiError(HTTP_STATUS.NOT_FOUND, 'Subject not found');
       if (subject.semester !== data.semester) {
-        throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Subject semester does not match exam semester');
+        throw new ApiError(HTTP_STATUS.BAD_REQUEST, 'Semester mismatch: Subject semester does not match exam semester');
       }
     }
 

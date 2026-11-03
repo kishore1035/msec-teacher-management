@@ -43,6 +43,16 @@ Enterprise modular backend for the Teacher Management System at educational inst
 - **Assignment Analytics Engine:** Aggregated overview counters (completion rate, average marks, late submissions), class-wise, subject-wise, and individual student progress metrics.
 - **Protected File Streaming:** Secure attachment access at `/api/v1/attachments/:attachmentId` verifying role and enrollment boundaries.
 
+### Phase 5: Assessments, Examinations & Results Management
+- **Examination Management:** Full examination lifecycle (`draft`, `scheduled`, `ongoing`, `completed`, `published`, `cancelled`) across assessment types (`IA1`, `IA2`, `IA3`, `semester`, `practical`, `supplementary`, `other`).
+- **Timetable Scheduling & Conflict Prevention:** Venue, invigilator, and time-slot scheduling backed by database-level compound unique indexes to guarantee zero overlapping exams for the same section.
+- **Dynamic Grading Engine:** Zero hardcoded thresholds; institutional grade bands, grade points, percentages, and pass/fail criteria are loaded dynamically from active `GradingPolicy` records.
+- **Marks Entry & Validation:** Bulk marks entry with bounds validation (`0 <= marksObtained <= maximumMarks`), absent/exempted status tracking, and teacher-assignment permission boundaries.
+- **Continuous Internal Assessment (IA) Engine:** Dynamic calculation supporting `BEST_2_OF_3`, `AVERAGE_ALL`, and `WEIGHTED` evaluation models.
+- **Results Confidentiality & RBAC:** Unpublished marks are strictly hidden from students and parents. Students can view only their own published results; parents are restricted to their linked children's published results.
+- **Post-Publication Modification Audit Trail:** Post-publication marks alterations mandate an explanation reason and log an immutable audit trail (`previousMarks`, `newMarks`, `previousGrade`, `newGrade`, `changedBy`, `reason`, `timestamp`).
+- **Examination Analytics Engine:** Class average, subject performance breakdown, highest/lowest marks, pass/fail percentages, and grade distributions.
+
 ---
 
 ## Getting Started
@@ -114,5 +124,20 @@ npm start
 | **Attendance Reports** | `GET /attendance/students/:id` | Student (Self) / Parent (Linked) / Teacher / Admin |
 | **Attendance Reports** | `GET /attendance/shortages` | Teacher / Admin |
 | **Attendance Reports** | `GET /attendance/summary` | Teacher / Admin |
+| **Examinations** | `GET, POST /examinations` | Admin / Authenticated |
+| **Examinations** | `GET, PUT, DELETE /examinations/:id` | Admin / Authenticated |
+| **Examinations** | `PATCH /examinations/:id/status` | Admin |
+| **Examinations** | `POST /examinations/:id/schedule` | Admin |
+| **Examinations** | `POST /examinations/:id/marks` | Teacher / Admin (Bulk Marks Entry) |
+| **Examinations** | `POST /examinations/:id/publish` | Admin (Publish Results) |
+| **Examination Schedules** | `GET /examination-schedules` | Authenticated |
+| **Examination Schedules** | `GET /examination-schedules/section/:sectionId` | Authenticated |
+| **Examination Schedules** | `GET /examination-schedules/teacher` | Teacher |
+| **Internal Assessments** | `GET /internal-assessments/section/:sectionId/subject/:subjectId` | Teacher / Admin |
+| **Internal Assessments** | `GET /internal-assessments/student/:studentId` | Authenticated (RBAC Scoped) |
+| **Results** | `GET /results/examination/:examinationId` | Teacher / Admin |
+| **Results** | `GET /results/student/:studentId` | Authenticated (Self / Linked Child / Staff) |
+| **Results** | `GET /results/analytics/examination/:examinationId` | Teacher / Admin |
+| **Results** | `PATCH /results/:id/correct` | Teacher / Admin (Correction with Audit) |
 
 For detailed payloads, see [`docs/api-documentation.md`](docs/api-documentation.md).

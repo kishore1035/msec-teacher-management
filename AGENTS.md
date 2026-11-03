@@ -50,6 +50,7 @@ src/
 | **Phase 2** | Academic Core & Classes | `AcademicYear`, `Department`, `Class`, `Section`, `Subject`, `Teacher`, `TeacherAssignment` | `/api/v1/academics/*`, `/api/v1/departments/*`, `/api/v1/classes/*`, `/api/v1/sections/*`, `/api/v1/subjects/*`, `/api/v1/teacher-assignments/*`, `/api/v1/teachers/me/*` |
 | **Phase 3** | Attendance & Shortages | `AttendanceSession`, `AttendanceRecord`, `AttendancePolicy`, `Student`, `Parent` | `/api/v1/attendance/*` |
 | **Phase 4** | Assignment & Submissions | `Assignment`, `AssignmentSubmission` | `/api/v1/assignments/*`, `/api/v1/submissions/*`, `/api/v1/attachments/*` |
+| **Phase 5** | Assessments, Exams & Results | `Examination`, `ExaminationSchedule`, `GradingPolicy`, `ExaminationResult`, `QuestionAssessment` | `/api/v1/examinations/*`, `/api/v1/examination-schedules/*`, `/api/v1/examination-results/*`, `/api/v1/internal-assessments/*`, `/api/v1/results/*` |
 
 ---
 
@@ -83,7 +84,20 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 6. Development & Testing Commands
+## 6. Dynamic Grading Engine & Examination Invariants
+
+- **Non-Hardcoded Dynamic Grading:** Grading policies are stored dynamically in `GradingPolicy`. Grade calculations, grade points, percentages, and pass/fail statuses are evaluated against the active institutional policy record rather than hardcoded rules.
+- **Internal Assessment (IA) Aggregation:** Configurable aggregation rules (`BEST_2_OF_3`, `AVERAGE_ALL`, `WEIGHTED`) to compute continuous internal evaluation components seamlessly.
+- **Examination Timetable Conflict Prevention:** Compound unique index on `{ section: 1, examDate: 1, startTime: 1 }` guarantees zero overlapping exam slots per section at the database tier.
+- **Results Confidentiality & RBAC:**
+  - Teachers can enter and modify marks only for subjects and sections actively assigned to them.
+  - Results are confidential until explicit publication (`isPublished = true`). Draft results are strictly hidden from students and parents.
+  - Students can only view their own individual published results; parents are restricted to viewing only their linked children's published results.
+- **Post-Publication Modification Audit Trail:** Any result adjustment made after publication mandates an explanatory `reason` (minimum 3 characters) and automatically logs an immutable audit trail (`previousMarks`, `newMarks`, `previousGrade`, `newGrade`, `changedBy`, `reason`, `timestamp`).
+
+---
+
+## 7. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -105,8 +119,8 @@ npm start
 
 ---
 
-## 7. Contribution Standards for Future Phases
+## 8. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, or Phase 4 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, or Phase 5 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.
