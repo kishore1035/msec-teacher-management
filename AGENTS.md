@@ -54,6 +54,9 @@ src/
 | **Phase 6** | Student Progress & Performance Analytics | `RiskRule`, `StudentProgress` | `/api/v1/progress/*`, `/api/v1/analytics/*`, `/api/v1/reports/*` |
 | **Phase 7** | Study Materials & Resource Management | `StudyMaterial`, `StudyMaterialVersion` | `/api/v1/study-materials/*` |
 | **Phase 8** | Timetable & Scheduling Management | `Timetable`, `TimetableEntry`, `TimetableChange`, `TimetableConflictOverride`, `TeacherLeave` | `/api/v1/timetables/*`, `/api/v1/timetable-entries/*`, `/api/v1/timetable-changes/*` |
+| **Phase 9** | Announcements & Notifications Management | `Announcement`, `Notification`, `NotificationPreference`, `NotificationDevice` | `/api/v1/announcements/*`, `/api/v1/notifications/*` |
+| **Phase 10** | Doubt Management & Parent Communication | `Doubt`, `DoubtMessage`, `Parent`, `ParentCommunication`, `ParentCommunicationMessage` | `/api/v1/doubts/*`, `/api/v1/parents/*`, `/api/v1/parent-communications/*` |
+| **Phase 11** | Leave, Substitution & Teacher Management | `Teacher`, `TeacherLeave` (`LeaveRequest`), `LeavePolicy`, `Substitution` | `/api/v1/teachers/*`, `/api/v1/leave-requests/*`, `/api/v1/leaves/*`, `/api/v1/substitutions/*`, `/api/v1/analytics/*` |
 
 ---
 
@@ -149,7 +152,43 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 10. Development & Testing Commands
+## 10. Announcements, Audience Resolution & Real-Time Notification Invariants
+
+- **Audience Resolution & Snapshot Preservation:** Recipients are resolved dynamically across role, department, class, section, subject, and specific user filters with strict `Set` deduplication. At publication time, `resolvedRecipientsSnapshot` is persisted so students changing sections later do not retroactively gain or lose access to historical announcements.
+- **Strict Teacher Targeting & Parent-Child Scoping:**
+  - Teachers can only target sections, classes, and subjects actively assigned to them (`TeacherAssignment` or `Section.classTeacher`).
+  - Parents receive and view announcements only for their linked children (`Parent.students`).
+  - Draft, scheduled, and expired announcements are strictly hidden from students and parents.
+- **Event Deduplication & Multi-Channel Delivery:**
+  - Compound unique partial indexes on `{ recipient: 1, eventKey: 1 }` and `{ recipient: 1, announcement: 1 }` prevent duplicate notifications for the same event and recipient.
+  - External providers (`IEmailNotificationProvider`, `ISmsNotificationProvider`, `IPushNotificationProvider`) support exponential backoff retries and idempotency keys without blocking in-app notification creation or falsely claiming delivery when unconfigured.
+- **Mandatory Alert Protection:** Users can configure channel preferences, timezones, and quiet hours (`NotificationPreference`), but cannot disable mandatory `emergency` or `security` notifications.
+- **Socket.IO Real-Time Channel Isolation:** Socket connections require a valid JWT with an active session and are isolated to `user:<userId>` rooms. Cross-user channel subscriptions are rejected.
+
+---
+
+## 11. Doubt Management & Parent Communication Invariants
+
+- **Automatic Teacher Identification & Scoping:** Student doubts automatically resolve the assigned teacher from active `TeacherAssignment` records for `(section, subject, academicYear)` with fallback to `Section.classTeacher`. Teachers can view and manage only doubts belonging to their assigned subjects and sections.
+- **Internal Staff Note Isolation:** Doubt messages with `isInternalNote: true` are strictly restricted to authorized teachers and administrators; they are never returned to students or parents.
+- **Configurable Reopening Rules:** Students can reopen `answered` or `resolved` doubts within the configurable institutional window (`reopenWindowDays`, default 7 days), incrementing `reopenCount` and notifying the assigned teacher.
+- **Multi-Guardian & Multi-Child Relationship Auditing:** Parents can be linked to multiple children and students can have multiple verified guardians (`father`, `mother`, `guardian`, `other`). Every link and unlink operation is recorded in `Parent.relationshipHistory` and synchronized with `Student.parents`.
+- **Parent Academic Portal Confidentiality:** Parents can access attendance, published assignments, published examination results, academic progress, and published timetables strictly for their linked children (`Parent.students`). Unpublished examination results and draft assignments are never exposed.
+- **Parent-Teacher Communication & Meeting Requests:** Communication threads (`ParentCommunication`) verify both parent-student linkage and teacher-student authorization before creation, support meeting scheduling (`in_person`, `online`, `phone`), and trigger Phase 9 notifications on replies and meeting updates.
+
+---
+
+## 12. Leave, Substitution & Teacher Management Invariants
+
+- **Dynamic Leave Policies & Non-Hardcoded Quotas:** Institutional leave rules, annual quotas, half-day/partial-day permissions, attachment requirements, and employment category eligibility are evaluated dynamically from active `LeavePolicy` records.
+- **Overlapping Leave Prevention & Timetable Impact Resolution:** Submitting a leave request validates against overlapping `pending` or `approved` leaves (with half-day/partial-day slot awareness) and automatically populates `affectedTimetableEntries` across published timetables.
+- **Self-Approval Prevention & Cascade Cancellation:** Users are strictly blocked from approving or reviewing their own leave requests. Cancelling a leave request automatically cancels linked `proposed`/`approved` substitutions and reverts associated `TimetableChange` overrides.
+- **Multi-Vector Substitution Conflict Engine:** Substitute teacher assignment checks active status, approved leaves (including partial-day slots), regular `TimetableEntry` collisions, and concurrent `Substitution` double-bookings.
+- **Non-Destructive Timetable Synchronization:** Approved substitutions synchronize with `TimetableChange` (`changeType: 'substitution'`) so date-specific timetable lookups reflect the substitute teacher without mutating the recurring `TimetableEntry`.
+
+---
+
+## 13. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -171,8 +210,9 @@ npm start
 
 ---
 
-## 11. Contribution Standards for Future Phases
+## 14. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, or Phase 8 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9, Phase 10, or Phase 11 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.
+

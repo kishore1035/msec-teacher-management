@@ -14,6 +14,7 @@ export interface IStudent extends Document {
   semester: number;
   academicYear: Types.ObjectId;
   parent?: Types.ObjectId;
+  parents?: Types.ObjectId[];
   phone?: string;
   status: 'Active' | 'Suspended' | 'Alumni' | 'Discontinued';
   createdAt: Date;
@@ -93,6 +94,12 @@ const studentSchema = new Schema<IStudent>(
       default: null,
       index: true,
     },
+    parents: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Parent',
+      },
+    ],
     phone: {
       type: String,
       trim: true,

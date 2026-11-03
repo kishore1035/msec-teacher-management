@@ -27,3 +27,13 @@ export * from './timetableEntry.model';
 export * from './timetableChange.model';
 export * from './timetableConflictOverride.model';
 export * from './teacherLeave.model';
+export * from './announcement.model';
+export * from './notification.model';
+export * from './notificationPreference.model';
+export * from './doubt.model';
+export * from './doubtMessage.model';
+export * from './parentCommunication.model';
+export * from './parentCommunicationMessage.model';
+export * from './leavePolicy.model';
+export * from './substitution.model';
+

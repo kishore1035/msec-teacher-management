@@ -94,3 +94,13 @@ export const uploadMaterialFiles = multer({
     files: 10,
   },
 });
+
+export const uploadAnnouncementFiles = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 25 * 1024 * 1024, // 25 MB max per announcement attachment
+    files: 5,
+  },
+});
+

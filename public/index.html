@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full antialiased dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MSEC Teacher Management & Academic ERP Backend</title>
+  <meta name="description" content="Enterprise educational ERP backend for teacher management, attendance tracking, assignments, assessments, student progress analytics, study materials, and timetable scheduling." />
+  <meta property="og:title" content="MSEC Teacher Management & Academic ERP Backend" />
+  <meta property="og:description" content="Enterprise educational ERP backend for teacher management, attendance tracking, assignments, assessments, student progress analytics, study materials, and timetable scheduling." />
+
+  <!-- Google Fonts: Plus Jakarta Sans, DM Sans, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN configured with Silv Metallic & Obsidian Bento Tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sans: ['"DM Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            silv: {
+              bgLight: '#ECEEF2',
+              cardLight: '#F8F9FB',
+              bgDark: '#0A0C10',
+              cardDark: '#13161D',
+              cardElevated: '#1A1E27',
+              lime: '#C8F904',
+              mint: '#10B981',
+              coral: '#FF6347',
+              cobalt: '#3B82F6',
+              silver: '#94A3B8',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Socket.IO Client served by backend -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    :root {
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-sans: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+    }
+    h1, h2, h3, .font-display {
+      font-family: var(--font-display);
+      letter-spacing: -0.025em;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Silv Brushed Metallic & Obsidian Bento Surfaces */
+    .silv-canvas {
+      background-color: #ECEEF2;
+      background-image:
+        radial-gradient(at 15% 10%, rgba(255, 255, 255, 0.8) 0px, transparent 55%),
+        radial-gradient(at 85% 90%, rgba(203, 213, 225, 0.5) 0px, transparent 55%);
+    }
+    .dark .silv-canvas {
+      background-color: #090B0F;
+      background-image:
+        radial-gradient(at 12% 8%, rgba(200, 249, 4, 0.05) 0px, transparent 45%),
+        radial-gradient(at 88% 15%, rgba(148, 163, 184, 0.06) 0px, transparent 50%),
+        radial-gradient(at 50% 95%, rgba(59, 130, 246, 0.05) 0px, transparent 55%);
+    }
+
+    .silv-bento {
+      background: linear-gradient(145deg, #FFFFFF 0%, #F4F6F9 100%);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    .dark .silv-bento {
+      background: linear-gradient(155deg, #161922 0%, #10131A 100%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 18px 40px -15px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .silv-bento-accent {
+      background: linear-gradient(145deg, #181C26 0%, #0F1219 100%);
+      border: 1px solid rgba(200, 249, 4, 0.28);
+      box-shadow: 0 18px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(200, 249, 4, 0.12);
+    }
+
+    .silv-subcard {
+      background: rgba(241, 245, 249, 0.75);
+      border: 1px solid rgba(226, 232, 240, 0.85);
+    }
+    .dark .silv-subcard {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Subtle bar hover transitions */
+    .bar-col {
+      transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
+    }
+    .bar-col:hover {
+      transform: scaleY(1.04);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.45);
+    }
+  </style>
+</head>
+<body class="min-h-full silv-canvas text-slate-900 dark:text-[#F3F5F8] selection:bg-[#C8F904] selection:text-slate-950 transition-colors duration-200">
+
+  <!-- App Root -->
+  <div id="app" class="min-h-screen flex flex-col max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
+    <!-- Top 3-Zone Silv Sculptural Header Bar -->
+    <header class="silv-bento rounded-2xl px-5 py-3 flex items-center justify-between gap-4 sticky top-3 z-30 backdrop-blur-xl">
+      
+      <!-- Zone 1: Silv Brand Mark + Context Breadcrumb -->
+      <div class="flex items-center gap-3.5 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-[#C8F904] text-white dark:text-slate-950 font-display font-extrabold text-sm flex items-center justify-center tracking-tighter shrink-0 shadow-sm">
+          S✦
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-display font-bold text-base tracking-tight text-slate-900 dark:text-white truncate">SILV ✦ MSEC PULSE</span>
+            <span class="text-slate-300 dark:text-slate-700">/</span>
+            <span id="header-breadcrumb" class="text-xs font-mono text-slate-500 dark:text-slate-400 truncate">Biometric &amp; Academic Telemetry</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+            <span id="active-user-name" class="font-medium text-slate-700 dark:text-slate-300">Dr. R. Subramanian</span>
+            <span>·</span>
+            <span id="active-user-role" class="font-mono uppercase text-[10px] text-emerald-600 dark:text-[#C8F904]">ADMIN</span>
+            <span class="hidden sm:inline">·</span>
+            <span id="realtime-status" class="hidden sm:inline font-mono text-[10px] text-slate-400">Syncing Telemetry</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone 2: 5 Single-Line Workspace Views -->
+      <nav aria-label="Primary Workspace Navigation" class="hidden xl:flex items-center gap-1 bg-slate-200/70 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-300/60 dark:border-white/[0.06]">
+        <button data-nav="overview" class="nav-tab px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap">
+          Pulse Overview
+        </button>
+        <button data-nav="announcements" class="nav-tab px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap">
+          Broadcasts
+        </button>
+        <button data-nav="attendance" class="nav-tab px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap">
+          Attendance Vitals
+        </button>
+        <button data-nav="academics" class="nav-tab px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap">
+          Timetable &amp; Exams
+        </button>
+        <button data-nav="notifications" class="nav-tab px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>Alerts &amp; Prefs</span>
+          <span id="nav-unread-count" class="font-mono text-[11px] tabular-nums text-emerald-600 dark:text-[#C8F904] font-bold hidden">0</span>
+        </button>
+      </nav>
+
+      <!-- Zone 3: Role Switcher, Surface Polarity & Single Primary Action CTA -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <label for="persona-select" class="sr-only">Switch Active Persona</label>
+        <select id="persona-select" class="h-9 px-3 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-300/80 dark:border-white/10 text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-slate-500 dark:focus:border-[#C8F904]">
+          <option value="admin@msec.ac.in|AdminPassword123" class="bg-white dark:bg-[#13161D]">Admin · Dr. Subramanian</option>
+          <option value="prof.sharma@msec.ac.in|TeacherPassword123" class="bg-white dark:bg-[#13161D]">Faculty · Prof. A. Sharma</option>
+          <option value="student@msec.ac.in|StudentPassword123" class="bg-white dark:bg-[#13161D]">Student · Vikram Aditya</option>
+          <option value="parent@msec.ac.in|ParentPassword123" class="bg-white dark:bg-[#13161D]">Parent · Suresh Aditya</option>
+        </select>
+
+        <button id="btn-open-login" type="button" class="h-9 px-3 rounded-xl silv-subcard text-xs font-medium text-slate-700 dark:text-slate-300 hover:opacity-85 transition-opacity hidden sm:inline-flex items-center" title="Custom Login">
+          Sign In
+        </button>
+
+        <a href="/api/v1/docs" class="h-9 px-3 rounded-xl silv-subcard text-xs font-mono text-slate-600 dark:text-slate-300 hover:opacity-85 transition-opacity hidden md:inline-flex items-center" title="OpenAPI Documentation">
+          API
+        </a>
+
+        <!-- Daylight / Obsidian Surface Toggle -->
+        <button id="btn-theme-toggle" type="button" class="h-9 w-9 rounded-xl silv-subcard flex items-center justify-center text-slate-700 dark:text-slate-200 hover:opacity-85 transition-opacity" title="Toggle Brushed Silver Light / Obsidian Dark">
+          <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+          <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Primary CTA -->
+        <button id="btn-primary-cta" type="button" class="h-9 px-4 rounded-xl bg-slate-900 dark:bg-[#C8F904] hover:opacity-90 text-white dark:text-slate-950 text-xs font-display font-bold tracking-tight transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm">
+          <span id="primary-cta-label">+ Broadcast</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile / Tablet Navigation Bar -->
+    <div class="xl:hidden mt-3 silv-bento rounded-xl p-1.5 flex items-center gap-1 overflow-x-auto">
+      <button data-nav="overview" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Pulse Overview</button>
+      <button data-nav="announcements" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Broadcasts</button>
+      <button data-nav="attendance" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Attendance Vitals</button>
+      <button data-nav="academics" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Timetable &amp; Exams</button>
+      <button data-nav="notifications" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap">Alerts &amp; Prefs</button>
+    </div>
+
+    <!-- Primary Fluid Bento Workspace -->
+    <main class="flex-1 w-full mt-5 pb-10">
+      <div id="workspace-content" class="space-y-5">
+        <!-- Dynamically rendered by /app.js -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Universal Modal Backdrop & Dialog Container -->
+  <div id="modal-root" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+    <div id="modal-panel" class="w-full max-w-2xl silv-bento rounded-2xl shadow-2xl overflow-hidden my-8">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+
+  <!-- Toast Stack -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

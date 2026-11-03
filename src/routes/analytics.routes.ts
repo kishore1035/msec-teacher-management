@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AnalyticsController } from '../controllers/analytics.controller';
+import { WorkloadAnalyticsController } from '../controllers/leaveSubstitutionTeacher.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/rbac.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
@@ -9,6 +10,7 @@ import {
   subjectAnalyticsQuerySchema,
   teacherInsightsQuerySchema,
 } from '../validators/progress.validator';
+import { workloadAnalyticsQuerySchema } from '../validators/leaveSubstitutionTeacher.validator';
 
 const router = Router();
 
@@ -93,5 +95,41 @@ router.get(
   AnalyticsController.getTeacherStudentsAtRisk
 );
 
+// ==========================================
+// Phase 11: Teacher Workload, Leave & Substitution Analytics
+// ==========================================
+router.get(
+  '/teacher-workload',
+  authenticate,
+  authorize([ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.TEACHER]),
+  validateRequest(workloadAnalyticsQuerySchema),
+  WorkloadAnalyticsController.getTeacherWorkload
+);
+
+router.get(
+  '/department-workload',
+  authenticate,
+  authorize([ROLES.SUPER_ADMIN, ROLES.ADMIN]),
+  validateRequest(workloadAnalyticsQuerySchema),
+  WorkloadAnalyticsController.getDepartmentWorkload
+);
+
+router.get(
+  '/leave-summary',
+  authenticate,
+  authorize([ROLES.SUPER_ADMIN, ROLES.ADMIN]),
+  validateRequest(workloadAnalyticsQuerySchema),
+  WorkloadAnalyticsController.getLeaveSummary
+);
+
+router.get(
+  '/substitution-summary',
+  authenticate,
+  authorize([ROLES.SUPER_ADMIN, ROLES.ADMIN]),
+  validateRequest(workloadAnalyticsQuerySchema),
+  WorkloadAnalyticsController.getSubstitutionSummary
+);
+
 export const analyticsRouter = router;
 export default router;
+

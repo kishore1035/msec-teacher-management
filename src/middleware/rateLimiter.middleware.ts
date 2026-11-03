@@ -35,3 +35,20 @@ export const authRateLimiter: RequestHandler =
           );
         },
       });
+
+export const communicationRateLimiter: RequestHandler =
+  env.NODE_ENV === 'test'
+    ? noopMiddleware
+    : rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: env.COMMUNICATION_RATE_LIMIT_MAX_REQUESTS,
+        standardHeaders: true,
+        legacyHeaders: false,
+        handler: (_req, _res, next) => {
+          next(
+            ApiError.tooManyRequests(
+              'Too many communication dispatch requests. Please try again later.'
+            )
+          );
+        },
+      });

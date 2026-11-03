@@ -23,6 +23,15 @@ import studyMaterialRouter from './studyMaterial.routes';
 import { timetableRouter } from './timetable.routes';
 import { timetableEntryRouter } from './timetableEntry.routes';
 import { timetableChangeRouter } from './timetableChange.routes';
+import { announcementRouter } from './announcement.routes';
+import { notificationRouter } from './notification.routes';
+import { doubtRouter } from './doubt.routes';
+import { parentRouter } from './parent.routes';
+import { parentCommunicationRouter } from './parentCommunication.routes';
+import { leaveRequestRouter, leaveRouter } from './leave.routes';
+import { substitutionRouter } from './substitution.routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '../config/swagger.config';
 
 const router = Router();
 
@@ -33,6 +42,12 @@ router.get('/health', (_req, res) => {
     uptime: process.uptime(),
   });
 });
+
+router.get('/openapi.json', (_req, res) => {
+  res.status(200).json(swaggerSpec);
+});
+
+router.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 router.use('/auth', authRouter);
 router.use('/academics', academicRouter);
@@ -58,5 +73,15 @@ router.use('/study-materials', studyMaterialRouter);
 router.use('/timetables', timetableRouter);
 router.use('/timetable-entries', timetableEntryRouter);
 router.use('/timetable-changes', timetableChangeRouter);
+router.use('/announcements', announcementRouter);
+router.use('/notifications', notificationRouter);
+router.use('/doubts', doubtRouter);
+router.use('/parents', parentRouter);
+router.use('/parent-communications', parentCommunicationRouter);
+router.use('/leave-requests', leaveRequestRouter);
+router.use('/leaves', leaveRouter);
+router.use('/substitutions', substitutionRouter);
 
 export const apiRouter = router;
+
+

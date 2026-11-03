@@ -257,6 +257,11 @@ export class TimetableConflictService {
 
           if (approvedLeaves.length > 0) {
             for (const leave of approvedLeaves) {
+              if (leave.isPartialDay && leave.startTime && leave.endTime) {
+                if (!timeSlotsOverlap(input.startTime, input.endTime, leave.startTime, leave.endTime)) {
+                  continue;
+                }
+              }
               conflicts.push({
                 conflictType: 'TEACHER_LEAVE_CONFLICT',
                 description: `Teacher ${teacher.firstName} ${teacher.lastName} has approved ${leave.leaveType} leave from ${leave.startDate.toISOString().split('T')[0]} to ${leave.endDate.toISOString().split('T')[0]}`,

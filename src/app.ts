@@ -1,3 +1,4 @@
+import path from 'path';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -11,8 +12,16 @@ import { ApiError } from './utils/apiError';
 export const createApp = (): Application => {
   const app = express();
 
-  // Security HTTP headers
-  app.use(helmet());
+  // Security HTTP headers (configured to allow AI Studio preview iframe and Swagger UI)
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      frameguard: false,
+    })
+  );
 
   // CORS configuration
   app.use(
@@ -35,6 +44,29 @@ export const createApp = (): Application => {
 
   // Rate Limiting
   app.use(generalRateLimiter);
+
+  const publicDir = path.join(process.cwd(), 'public');
+
+  // Root endpoint: serve interactive ERP frontend for browsers, return JSON for API clients & tests
+  app.get('/', (req: Request, res: Response) => {
+    const accept = req.headers.accept || '';
+    if (accept.includes('text/html') && env.NODE_ENV !== 'test') {
+      return res.sendFile(path.join(publicDir, 'index.html'));
+    }
+    return res.status(200).json({
+      success: true,
+      service: 'MSEC Teacher Management & Academic ERP Backend',
+      version: '1.0.0',
+      status: 'healthy',
+      docsEndpoint: '/api/v1/docs',
+      openApiSpec: '/api/v1/openapi.json',
+      healthEndpoint: '/api/v1/health',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Serve static frontend files (/app.js, /index.html, etc.)
+  app.use(express.static(publicDir));
 
   // Mount API Gateway
   app.use('/api/v1', apiRouter);

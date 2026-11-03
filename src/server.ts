@@ -1,27 +1,25 @@
 import { app } from './app';
 import { env } from './config/env.config';
 import { connectDatabase, disconnectDatabase } from './config/db.config';
-import { seedDevelopmentData } from './config/seed.config';
 import { logger } from './config/logger.config';
+import { SocketService } from './services/socket.service';
 import http from 'http';
 
 const startServer = async () => {
   try {
-    await connectDatabase();
-
-    if (env.NODE_ENV === 'development') {
-      await seedDevelopmentData();
-    }
-
     const server = http.createServer(app);
+    SocketService.initialize(server);
 
-    server.listen(env.PORT, () => {
+    server.listen(env.PORT, '0.0.0.0', () => {
       logger.info(`🚀 Teacher Management Backend listening on port ${env.PORT} in ${env.NODE_ENV} mode`);
       logger.info(`Health check available at http://localhost:${env.PORT}/api/v1/health`);
     });
 
+    await connectDatabase();
+
     const shutdown = async (signal: string) => {
       logger.info(`Received ${signal}. Starting graceful shutdown...`);
+      await SocketService.close();
       server.close(async () => {
         logger.info('HTTP server closed.');
         await disconnectDatabase();
