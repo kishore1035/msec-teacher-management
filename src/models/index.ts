@@ -18,3 +18,5 @@ export * from './examinationSchedule.model';
 export * from './gradingPolicy.model';
 export * from './examinationResult.model';
 export * from './questionAssessment.model';
+export * from './riskRule.model';
+export * from './studentProgress.model';
