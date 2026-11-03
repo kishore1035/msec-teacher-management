@@ -16,6 +16,9 @@ import {
   internalAssessmentRouter,
   resultRouter,
 } from './examination.routes';
+import progressRouter from './progress.routes';
+import analyticsRouter from './analytics.routes';
+import reportRouter from './report.routes';
 
 const router = Router();
 
@@ -44,5 +47,8 @@ router.use('/examination-schedules', examinationScheduleRouter);
 router.use('/examination-results', examinationResultRouter);
 router.use('/internal-assessments', internalAssessmentRouter);
 router.use('/results', resultRouter);
+router.use('/progress', progressRouter);
+router.use('/analytics', analyticsRouter);
+router.use('/reports', reportRouter);
 
 export const apiRouter = router;
