@@ -195,8 +195,11 @@ ${subjectWise.map((s) => `* [${s.subjectCode}] ${s.subjectName.padEnd(25)} | Att
     options: ReportOptionsDTO = {}
   ): Promise<any> {
     const section = await Section.findById(sectionId)
-      .populate('department', 'name code')
-      .populate('class', 'name')
+      .populate({
+        path: 'class',
+        select: 'name department',
+        populate: { path: 'department', select: 'name code' },
+      })
       .populate('academicYear', 'year');
 
     if (!section) {

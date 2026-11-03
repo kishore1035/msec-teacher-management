@@ -384,7 +384,13 @@ export class StudentProgressService {
       });
     }
 
-    return progressDoc;
+    const populated = await StudentProgress.findById(progressDoc._id)
+      .populate('student', 'firstName lastName usn rollNumber email')
+      .populate('academicYear', 'year')
+      .populate('section', 'name sectionName')
+      .populate('subject', 'name code');
+
+    return (populated || progressDoc) as IStudentProgress;
   }
 
   /**

@@ -650,25 +650,8 @@ export class ClassSubjectAnalyticsService {
       .populate('section', 'name semester')
       .populate('subject', 'name code credits');
 
-    if (assignments.length === 0) {
-      return {
-        teacherId: teacher._id,
-        teacherName: `${teacher.firstName} ${teacher.lastName}`,
-        assignedClassesCount: 0,
-        assignedSubjectsCount: 0,
-        classOverview: null,
-      };
-    }
-
-    const sectionIds = assignments.map((a) => a.section._id);
-    const subjectIds = assignments.map((a) => a.subject._id);
-
-    // Apply teacher-scoped filters
-    const scopedFilters: AnalyticsFilterDTO = {
-      ...filters,
-      section: filters.section || undefined,
-      subject: filters.subject || undefined,
-    };
+    const sectionIds = assignments.map((a) => (a.section as any)._id || a.section);
+    const subjectIds = assignments.map((a) => (a.subject as any)._id || a.subject);
 
     if (filters.section && !sectionIds.some((s) => s.toString() === filters.section)) {
       throw new ApiError(
@@ -683,6 +666,23 @@ export class ClassSubjectAnalyticsService {
         'You are not authorized to view insights for subjects outside your assignment'
       );
     }
+
+    if (assignments.length === 0) {
+      return {
+        teacherId: teacher._id,
+        teacherName: `${teacher.firstName} ${teacher.lastName}`,
+        assignedClassesCount: 0,
+        assignedSubjectsCount: 0,
+        classOverview: null,
+      };
+    }
+
+    // Apply teacher-scoped filters
+    const scopedFilters: AnalyticsFilterDTO = {
+      ...filters,
+      section: filters.section || undefined,
+      subject: filters.subject || undefined,
+    };
 
     // Compute aggregated overview for assigned classes
     const classOverview = await this.getClassOverview({

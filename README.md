@@ -53,6 +53,15 @@ Enterprise modular backend for the Teacher Management System at educational inst
 - **Post-Publication Modification Audit Trail:** Post-publication marks alterations mandate an explanation reason and log an immutable audit trail (`previousMarks`, `newMarks`, `previousGrade`, `newGrade`, `changedBy`, `reason`, `timestamp`).
 - **Examination Analytics Engine:** Class average, subject performance breakdown, highest/lowest marks, pass/fail percentages, and grade distributions.
 
+### Phase 6: Student Progress Tracking & Performance Analytics
+- **Student Progress Profile Engine:** Multi-source academic profiles integrating attendance, assignment submissions, IA marks, and examination results into dynamic overall percentages.
+- **Trend Detection:** Chronological performance analysis tracking trajectory over time (`improving`, `declining`, `stable`, `irregular`).
+- **Explainable At-Risk Student Detection:** Rule-driven risk scoring engine based on configurable institutional rules (`RiskRule`). Emits transparent indicators (`LOW_ATTENDANCE`, `MISSING_ASSIGNMENTS`, `POOR_IA_PERFORMANCE`, `DECLINING_PERFORMANCE_TREND`, `MULTIPLE_FAILED_SUBJECTS`) with severity levels and score contributions.
+- **Class Performance Analytics:** Class overview, subject averages, grade distributions, top performers, students requiring attention, attendance rates, and assignment completion breakdowns.
+- **Subject Analytics & Difficulty Indicator:** Average/highest/lowest marks, pass/fail rates, section comparisons, and data-backed difficulty indicators (with minimum sample size safeguards).
+- **Teacher Performance Insights:** Academic overview and at-risk student monitoring scoped strictly to assigned subjects and sections.
+- **Structured Progress Reports & Export Engine:** Comprehensive student and class progress reports with support for JSON representation, Excel/CSV exports (`text/csv` / `application/vnd.ms-excel`), and formatted summaries. Historical progress snapshots are preserved without data corruption.
+
 ---
 
 ## Getting Started
@@ -139,5 +148,24 @@ npm start
 | **Results** | `GET /results/student/:studentId` | Authenticated (Self / Linked Child / Staff) |
 | **Results** | `GET /results/analytics/examination/:examinationId` | Teacher / Admin |
 | **Results** | `PATCH /results/:id/correct` | Teacher / Admin (Correction with Audit) |
+| **Student Progress** | `GET /progress/students/:studentId` | Authenticated (Self / Linked Child / Assigned Staff) |
+| **Student Progress** | `GET /progress/students/:studentId/subjects` | Authenticated (Self / Linked Child / Staff) |
+| **Student Progress** | `GET /progress/students/:studentId/history` | Authenticated (Self / Linked Child / Staff) |
+| **Student Progress** | `GET /progress/students/:studentId/trends` | Authenticated (Self / Linked Child / Staff) |
+| **Risk Detection** | `GET /progress/at-risk` | Teacher / Admin |
+| **Risk Detection** | `GET /progress/at-risk/:studentId` | Authenticated (Scoped) |
+| **Risk Rules** | `GET, POST /progress/risk-rules` | Admin (POST) / Staff (GET) |
+| **Class Analytics** | `GET /analytics/class/overview` | Teacher / Admin |
+| **Class Analytics** | `GET /analytics/class/performance` | Teacher / Admin |
+| **Class Analytics** | `GET /analytics/class/attendance` | Teacher / Admin |
+| **Class Analytics** | `GET /analytics/class/assignments` | Teacher / Admin |
+| **Subject Analytics** | `GET /analytics/subject/overview` | Teacher / Admin |
+| **Subject Analytics** | `GET /analytics/subject/performance` | Teacher / Admin |
+| **Subject Analytics** | `GET /analytics/subject/comparison` | Teacher / Admin |
+| **Teacher Insights** | `GET /analytics/teacher/overview` | Teacher / Admin |
+| **Teacher Insights** | `GET /analytics/teacher/students-at-risk` | Teacher / Admin |
+| **Progress Reports** | `GET /reports/students/:studentId/progress` | Authenticated (Self / Linked Child / Staff) |
+| **Progress Reports** | `POST /reports/students/:studentId/generate` | Teacher / Admin (Archived Snapshot) |
+| **Progress Reports** | `GET /reports/class/:sectionId` | Teacher / Admin |
 
 For detailed payloads, see [`docs/api-documentation.md`](docs/api-documentation.md).

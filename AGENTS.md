@@ -51,6 +51,7 @@ src/
 | **Phase 3** | Attendance & Shortages | `AttendanceSession`, `AttendanceRecord`, `AttendancePolicy`, `Student`, `Parent` | `/api/v1/attendance/*` |
 | **Phase 4** | Assignment & Submissions | `Assignment`, `AssignmentSubmission` | `/api/v1/assignments/*`, `/api/v1/submissions/*`, `/api/v1/attachments/*` |
 | **Phase 5** | Assessments, Exams & Results | `Examination`, `ExaminationSchedule`, `GradingPolicy`, `ExaminationResult`, `QuestionAssessment` | `/api/v1/examinations/*`, `/api/v1/examination-schedules/*`, `/api/v1/examination-results/*`, `/api/v1/internal-assessments/*`, `/api/v1/results/*` |
+| **Phase 6** | Student Progress & Performance Analytics | `RiskRule`, `StudentProgress` | `/api/v1/progress/*`, `/api/v1/analytics/*`, `/api/v1/reports/*` |
 
 ---
 
@@ -97,7 +98,21 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 7. Development & Testing Commands
+## 7. Student Progress Tracking & Risk Detection Invariants
+
+- **Multi-Source Progress Aggregation:** Progress profiles combine attendance sessions, assignment submissions, internal assessments (IA1–IA3), and examination results dynamically without duplicating underlying operational records.
+- **Explainable Academic Risk Classification:** Risk scores are calculated based on configurable institutional rules (`RiskRule`). Students are classified into `low`, `medium`, or `high` risk strictly with data-backed, explainable indicators (`LOW_ATTENDANCE`, `MISSING_ASSIGNMENTS`, `POOR_IA_PERFORMANCE`, `DECLINING_PERFORMANCE_TREND`, `MULTIPLE_FAILED_SUBJECTS`) detailing the exact numeric deficit.
+- **Missing Marks Handling:** Assessments that were not scheduled or taken are never evaluated as zero percent; averages are calculated exclusively over evaluated items.
+- **Historical Snapshot Preservation:** Academic progress recalculations preserve historical progress snapshots (`isSnapshot: true`) and never overwrite archived snapshots.
+- **Strict Role-Scoped Analytics:**
+  - Students can only view their own progress profiles, trends, and reports.
+  - Parents can only access their linked children's progress.
+  - Teachers are restricted to viewing analytics and insights for subjects and sections assigned to them.
+  - Administrators have institution-level analytics and risk rule configuration authority.
+
+---
+
+## 8. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -119,8 +134,8 @@ npm start
 
 ---
 
-## 8. Contribution Standards for Future Phases
+## 9. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, or Phase 5 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, or Phase 6 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.
