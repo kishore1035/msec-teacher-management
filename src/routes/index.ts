@@ -19,6 +19,7 @@ import {
 import progressRouter from './progress.routes';
 import analyticsRouter from './analytics.routes';
 import reportRouter from './report.routes';
+import studyMaterialRouter from './studyMaterial.routes';
 
 const router = Router();
 
@@ -50,5 +51,6 @@ router.use('/results', resultRouter);
 router.use('/progress', progressRouter);
 router.use('/analytics', analyticsRouter);
 router.use('/reports', reportRouter);
+router.use('/study-materials', studyMaterialRouter);
 
 export const apiRouter = router;
