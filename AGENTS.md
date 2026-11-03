@@ -52,6 +52,7 @@ src/
 | **Phase 4** | Assignment & Submissions | `Assignment`, `AssignmentSubmission` | `/api/v1/assignments/*`, `/api/v1/submissions/*`, `/api/v1/attachments/*` |
 | **Phase 5** | Assessments, Exams & Results | `Examination`, `ExaminationSchedule`, `GradingPolicy`, `ExaminationResult`, `QuestionAssessment` | `/api/v1/examinations/*`, `/api/v1/examination-schedules/*`, `/api/v1/examination-results/*`, `/api/v1/internal-assessments/*`, `/api/v1/results/*` |
 | **Phase 6** | Student Progress & Performance Analytics | `RiskRule`, `StudentProgress` | `/api/v1/progress/*`, `/api/v1/analytics/*`, `/api/v1/reports/*` |
+| **Phase 7** | Study Materials & Resource Management | `StudyMaterial`, `StudyMaterialVersion` | `/api/v1/study-materials/*` |
 
 ---
 
@@ -112,7 +113,22 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 8. Development & Testing Commands
+## 8. Study Materials & Version Preservation Invariants
+
+- **Storage Abstraction & Multi-Format Support:** File uploads are abstracted via `LocalStorageService` to handle documents, images, and videos (PDF, DOC/DOCX, PPT/PPTX, XLS/XLSX, TXT, ZIP, JPEG, PNG, MP4, WEBM) up to 50MB per file with path-traversal prevention.
+- **Resource Visibility & Student Protection:**
+  - `class`: Accessible exclusively to students in the designated section.
+  - `subject`: Accessible to all students taking the designated subject across sections.
+  - `institution`: Institution-wide access across departments.
+  - Draft materials are strictly hidden from students.
+  - Parents cannot access or download teacher study materials directly.
+- **Immutable Historical Versioning:** Every update to a study material preserves the pre-update document in `StudyMaterialVersion`, including version number, prior file references, topics, and author metadata. Version archives are never mutated.
+- **Atomic Engagement Counter Tracking:** Detail lookups atomically increment `viewCount`. Protected file downloads atomically increment `downloadCount`.
+- **Search Optimization:** MongoDB compound text index on `{ title: 'text', description: 'text', topic: 'text', tags: 'text' }` paired with regex search fallback guarantees robust discovery.
+
+---
+
+## 9. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -134,8 +150,8 @@ npm start
 
 ---
 
-## 9. Contribution Standards for Future Phases
+## 10. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, or Phase 6 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, or Phase 7 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.

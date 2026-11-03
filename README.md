@@ -62,6 +62,15 @@ Enterprise modular backend for the Teacher Management System at educational inst
 - **Teacher Performance Insights:** Academic overview and at-risk student monitoring scoped strictly to assigned subjects and sections.
 - **Structured Progress Reports & Export Engine:** Comprehensive student and class progress reports with support for JSON representation, Excel/CSV exports (`text/csv` / `application/vnd.ms-excel`), and formatted summaries. Historical progress snapshots are preserved without data corruption.
 
+### Phase 7: Study Materials & Resource Management
+- **Study Material Lifecycle:** Draft creation, publication, closing, and archiving (`draft`, `published`, `archived`) with strict teacher-assignment authorization guards.
+- **Multi-Attachment File Engine:** Upload and stream PDF, Office documents (DOC, DOCX, PPT, PPTX, XLS, XLSX), plain text, ZIP archives, images, and video formats (MP4, WEBM) up to 50MB per file with path-traversal prevention.
+- **Resource Visibility & Student Access:** Granular visibility controls (`class`, `subject`, `institution`). Students can access published materials matching their section or enrolled subjects via `/api/v1/study-materials/my-resources`. Draft materials remain strictly hidden from students. Parents cannot access teacher study materials directly.
+- **Full-Text & Tag Search:** Search resources using MongoDB text indexes and regex fallback across `title`, `description`, `topic`, and `tags`.
+- **Subject-Wise Resource Directory:** Filter and paginate materials by subject, unit, semester, academic year, and material type.
+- **Version History & Archive Tracking:** Automatic version preservation in `StudyMaterialVersion` on updates, storing previous document states, version number, changelog, and editor references.
+- **Engagement Metrics & Analytics Engine:** Atomic incrementation of `viewCount` on detail retrieval and `downloadCount` on attachment download. Overview statistics, subject distribution breakdown, teacher upload contributions, and top-downloaded resources analytics.
+
 ---
 
 ## Getting Started
@@ -167,5 +176,21 @@ npm start
 | **Progress Reports** | `GET /reports/students/:studentId/progress` | Authenticated (Self / Linked Child / Staff) |
 | **Progress Reports** | `POST /reports/students/:studentId/generate` | Teacher / Admin (Archived Snapshot) |
 | **Progress Reports** | `GET /reports/class/:sectionId` | Teacher / Admin |
+| **Study Materials** | `POST /study-materials` | Teacher / Admin (Upload multi-files & create) |
+| **Study Materials** | `GET /study-materials` | Authenticated (Filtered list) |
+| **Study Materials** | `GET /study-materials/my-resources` | Student (Enrolled section/subject resources) |
+| **Study Materials** | `GET /study-materials/search` | Authenticated (Full-text & tag search) |
+| **Study Materials** | `GET /study-materials/subjects/:subjectId` | Authenticated (Subject directory) |
+| **Study Materials** | `GET /study-materials/analytics/overview` | Teacher / Admin |
+| **Study Materials** | `GET /study-materials/analytics/subjects` | Teacher / Admin |
+| **Study Materials** | `GET /study-materials/analytics/teachers` | Admin |
+| **Study Materials** | `GET /study-materials/analytics/popular` | Authenticated |
+| **Study Materials** | `GET /study-materials/attachments/:attachmentId/download` | Authenticated (Authorized Student/Staff streaming) |
+| **Study Materials** | `GET /study-materials/:id` | Authenticated (Increments view count) |
+| **Study Materials** | `PUT /study-materials/:id` | Teacher / Admin (Updates & archives version) |
+| **Study Materials** | `DELETE /study-materials/:id` | Teacher / Admin |
+| **Study Materials** | `PATCH /study-materials/:id/publish` | Teacher / Admin |
+| **Study Materials** | `PATCH /study-materials/:id/archive` | Teacher / Admin |
+| **Study Materials** | `GET /study-materials/:id/versions` | Teacher / Admin |
 
 For detailed payloads, see [`docs/api-documentation.md`](docs/api-documentation.md).
