@@ -71,6 +71,24 @@ Enterprise modular backend for the Teacher Management System at educational inst
 - **Version History & Archive Tracking:** Automatic version preservation in `StudyMaterialVersion` on updates, storing previous document states, version number, changelog, and editor references.
 - **Engagement Metrics & Analytics Engine:** Atomic incrementation of `viewCount` on detail retrieval and `downloadCount` on attachment download. Overview statistics, subject distribution breakdown, teacher upload contributions, and top-downloaded resources analytics.
 
+### Phase 8: Timetable & Scheduling Management
+- **Timetable Lifecycle & Exclusivity:** Full timetable lifecycle (`draft`, `published`, `archived`) with effective date validity ranges (`effectiveFrom`, `effectiveTo`). Conflict prevention index guarantees zero overlapping published timetables for the same section.
+- **Period Entry Management:** Section lectures, multi-period practicals, tutorial slots, co-teachers (`additionalTeachers`), room and laboratory assignments.
+- **Explainable Conflict Detection Engine:** Real-time pre-flight conflict detection identifying:
+  1. *Teacher Conflicts:* Prevents overlapping lecture assignments for lead and co-teachers.
+  2. *Section Conflicts:* Prevents double-booking class rosters for simultaneous lectures.
+  3. *Classroom Conflicts:* Prevents allocating a single room to multiple sections simultaneously.
+  4. *Laboratory Conflicts:* Protects dedicated lab rooms from overlapping simultaneous bookings.
+  5. *Teacher Availability & Leave:* Validates active `status` and blocks scheduling during approved `TeacherLeave` intervals.
+  6. *Examination Timetable Conflicts:* Prevents regular lecture scheduling that clashes with scheduled `ExaminationSchedule` slots.
+- **Audited Administrator Conflict Overrides:** Permits authorized administrators (`Super Admin`, `Admin`) to override scheduling conflicts with a mandatory explanation reason, recording an immutable audit log (`TimetableConflictOverride`).
+- **Role-Scoped Timetable Views:**
+  - *Teachers:* Dedicated daily (`/teachers/me/today`) and weekly (`/teachers/me/weekly`) schedules with calculated free periods and workload metrics (total teaching hours and subject-wise teaching hours).
+  - *Students:* Enrolled section schedule (`/students/me` and `/students/me/today`). Draft timetables remain strictly hidden.
+  - *Parents:* Securely restricted to viewing only their linked children's published section timetables.
+- **Dynamic Substitutions & Rescheduling:** Temporary overrides (`substitution`, `rescheduling`, `cancellation`, `classroom_change`) for specific dates with conflict validation on substitute teachers and rooms without mutating original timetable records.
+- **Timetable Analytics Engine:** Aggregates weekly teacher workload summaries, classroom/laboratory utilization percentages, free room availability queries, and subject distribution counts.
+
 ---
 
 ## Getting Started
@@ -192,5 +210,27 @@ npm start
 | **Study Materials** | `PATCH /study-materials/:id/publish` | Teacher / Admin |
 | **Study Materials** | `PATCH /study-materials/:id/archive` | Teacher / Admin |
 | **Study Materials** | `GET /study-materials/:id/versions` | Teacher / Admin |
+| **Timetables** | `POST, GET /timetables` | Admin (POST) / Authenticated (GET) |
+| **Timetables** | `GET, PUT, DELETE /timetables/:id` | Admin (PUT/DELETE) / Authenticated (GET) |
+| **Timetables** | `PATCH /timetables/:id/publish` | Admin (Publish & activate timetable) |
+| **Timetables** | `PATCH /timetables/:id/archive` | Admin (Archive timetable) |
+| **Timetable Entries** | `POST, GET /timetables/:id/entries` | Admin (POST) / Authenticated (GET) |
+| **Timetable Entries** | `PUT, DELETE /timetable-entries/:entryId` | Admin |
+| **Conflict Engine** | `POST /timetables/check-conflicts` | Staff / Admin (Pre-flight conflict check) |
+| **Conflict Engine** | `GET /timetables/conflicts` | Admin (Audit trail) |
+| **Conflict Engine** | `POST /timetables/conflicts/:id/override` | Admin (Override with reason) |
+| **Teacher Timetable** | `GET /timetables/teachers/me` | Teacher (Weekly schedule & teaching hours) |
+| **Teacher Timetable** | `GET /timetables/teachers/me/today` | Teacher (Today's lectures & free periods) |
+| **Teacher Timetable** | `GET /timetables/teachers/me/weekly` | Teacher (Weekly matrix) |
+| **Student Timetable** | `GET /timetables/students/me` | Student (Enrolled section schedule) |
+| **Student Timetable** | `GET /timetables/students/me/today` | Student (Today's schedule) |
+| **Section Timetable** | `GET /timetables/sections/:sectionId` | Authenticated (RBAC scoped) |
+| **Timetable Changes** | `POST, GET /timetable-changes` | Teacher / Admin (Substitution/Reschedule) |
+| **Timetable Changes** | `PUT /timetable-changes/:id/approve` | Admin (Approve substitution) |
+| **Timetable Changes** | `PUT /timetable-changes/:id/reject` | Admin (Reject substitution) |
+| **Timetable Analytics**| `GET /timetables/analytics/teacher-workload` | Admin (Teacher weekly hours) |
+| **Timetable Analytics**| `GET /timetables/analytics/classroom-utilization`| Admin (Room usage & free room query) |
+| **Timetable Analytics**| `GET /timetables/analytics/subject-distribution` | Admin (Subject lecture count) |
+| **Timetable Analytics**| `GET /timetables/analytics/conflicts` | Admin (Conflict report) |
 
 For detailed payloads, see [`docs/api-documentation.md`](docs/api-documentation.md).

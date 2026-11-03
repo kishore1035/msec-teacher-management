@@ -20,6 +20,9 @@ import progressRouter from './progress.routes';
 import analyticsRouter from './analytics.routes';
 import reportRouter from './report.routes';
 import studyMaterialRouter from './studyMaterial.routes';
+import { timetableRouter } from './timetable.routes';
+import { timetableEntryRouter } from './timetableEntry.routes';
+import { timetableChangeRouter } from './timetableChange.routes';
 
 const router = Router();
 
@@ -52,5 +55,8 @@ router.use('/progress', progressRouter);
 router.use('/analytics', analyticsRouter);
 router.use('/reports', reportRouter);
 router.use('/study-materials', studyMaterialRouter);
+router.use('/timetables', timetableRouter);
+router.use('/timetable-entries', timetableEntryRouter);
+router.use('/timetable-changes', timetableChangeRouter);
 
 export const apiRouter = router;

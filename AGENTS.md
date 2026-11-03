@@ -53,6 +53,7 @@ src/
 | **Phase 5** | Assessments, Exams & Results | `Examination`, `ExaminationSchedule`, `GradingPolicy`, `ExaminationResult`, `QuestionAssessment` | `/api/v1/examinations/*`, `/api/v1/examination-schedules/*`, `/api/v1/examination-results/*`, `/api/v1/internal-assessments/*`, `/api/v1/results/*` |
 | **Phase 6** | Student Progress & Performance Analytics | `RiskRule`, `StudentProgress` | `/api/v1/progress/*`, `/api/v1/analytics/*`, `/api/v1/reports/*` |
 | **Phase 7** | Study Materials & Resource Management | `StudyMaterial`, `StudyMaterialVersion` | `/api/v1/study-materials/*` |
+| **Phase 8** | Timetable & Scheduling Management | `Timetable`, `TimetableEntry`, `TimetableChange`, `TimetableConflictOverride`, `TeacherLeave` | `/api/v1/timetables/*`, `/api/v1/timetable-entries/*`, `/api/v1/timetable-changes/*` |
 
 ---
 
@@ -128,7 +129,27 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 9. Development & Testing Commands
+## 9. Timetable & Scheduling Management Invariants
+
+- **Compound Exclusivity & Non-Overlapping Timetables:** Compound indexes on `{ section: 1, effectiveFrom: 1, effectiveTo: 1, status: 1 }` guarantee zero conflicting active published timetables for the same section.
+- **Pre-Save Multi-Vector Conflict Engine:** Pre-save conflict detection enforces 6 strict invariants:
+  1. No double-booking teachers across concurrent lectures on overlapping dates.
+  2. No overlapping lecture periods for the same section.
+  3. No allocating a single classroom to multiple sections concurrently.
+  4. Concurrent session limits for laboratories.
+  5. Teacher availability enforcement against `status: 'On Leave'` and approved `TeacherLeave` intervals.
+  6. Collision detection against scheduled examinations (`ExaminationSchedule`).
+- **Audited Conflict Overrides:** Administrators can override detected conflicts only by supplying `allowOverride: true` and an explanatory reason (minimum 3 characters), which generates an immutable audit record in `TimetableConflictOverride`.
+- **Non-Destructive Substitutions & Overrides:** Daily lecture substitutions, cancellations, and classroom changes are recorded in `TimetableChange`. Historical timetable entries remain intact.
+- **Strict Role-Scoped Access:**
+  - Students can only view their own section's published timetable (`draft` status strictly hidden).
+  - Parents can only view section timetables for their linked children.
+  - Teachers can access their personal daily and weekly schedules with calculated free periods and teaching hours.
+  - Administrators maintain institution-wide analytics and approval authority.
+
+---
+
+## 10. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -150,8 +171,8 @@ npm start
 
 ---
 
-## 10. Contribution Standards for Future Phases
+## 11. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, or Phase 7 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, or Phase 8 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.

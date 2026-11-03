@@ -22,3 +22,8 @@ export * from './riskRule.model';
 export * from './studentProgress.model';
 export * from './studyMaterial.model';
 export * from './studyMaterialVersion.model';
+export * from './timetable.model';
+export * from './timetableEntry.model';
+export * from './timetableChange.model';
+export * from './timetableConflictOverride.model';
+export * from './teacherLeave.model';
