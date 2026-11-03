@@ -1,12 +1,17 @@
 import { app } from './app';
 import { env } from './config/env.config';
 import { connectDatabase, disconnectDatabase } from './config/db.config';
+import { seedDevelopmentData } from './config/seed.config';
 import { logger } from './config/logger.config';
 import http from 'http';
 
 const startServer = async () => {
   try {
     await connectDatabase();
+
+    if (env.NODE_ENV === 'development') {
+      await seedDevelopmentData();
+    }
 
     const server = http.createServer(app);
 
