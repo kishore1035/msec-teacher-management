@@ -36,6 +36,8 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
   'image/png',
   'image/webp',
+  'video/mp4',
+  'video/webm',
 ]);
 
 const ALLOWED_EXTENSIONS = new Set([
@@ -52,6 +54,8 @@ const ALLOWED_EXTENSIONS = new Set([
   '.jpeg',
   '.png',
   '.webp',
+  '.mp4',
+  '.webm',
 ]);
 
 const fileFilter = (
@@ -65,7 +69,7 @@ const fileFilter = (
     return cb(
       new ApiError(
         HTTP_STATUS.BAD_REQUEST,
-        `Unsupported file type: ${ext} (${file.mimetype}). Permitted formats are PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, and standard images.`
+        `Unsupported file type: ${ext} (${file.mimetype}). Permitted formats are PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, MP4, WEBM, and standard images.`
       )
     );
   }
@@ -79,5 +83,14 @@ export const uploadAssignmentFiles = multer({
   limits: {
     fileSize: 25 * 1024 * 1024, // 25 MB max per file
     files: 5, // max 5 files per submission or assignment
+  },
+});
+
+export const uploadMaterialFiles = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50 MB max per material attachment
+    files: 10,
   },
 });
