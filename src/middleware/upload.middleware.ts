@@ -4,6 +4,7 @@ import fs from 'fs';
 import { Request } from 'express';
 import { ApiError } from '../utils/apiError';
 import { HTTP_STATUS } from '../constants/statusCodes';
+import { env } from '../config/env.config';
 
 const tempUploadDir = path.join(process.cwd(), 'uploads', 'temp');
 if (!fs.existsSync(tempUploadDir)) {
@@ -77,11 +78,13 @@ const fileFilter = (
   cb(null, true);
 };
 
+const maxConfiguredBytes = Math.max(1, env.MAX_FILE_UPLOAD_SIZE_MB) * 1024 * 1024;
+
 export const uploadAssignmentFiles = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 25 * 1024 * 1024, // 25 MB max per file
+    fileSize: Math.min(25 * 1024 * 1024, maxConfiguredBytes), // 25 MB max per file
     files: 5, // max 5 files per submission or assignment
   },
 });
@@ -90,7 +93,7 @@ export const uploadMaterialFiles = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50 MB max per material attachment
+    fileSize: maxConfiguredBytes, // 50 MB default max per material attachment
     files: 10,
   },
 });
@@ -99,8 +102,7 @@ export const uploadAnnouncementFiles = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 25 * 1024 * 1024, // 25 MB max per announcement attachment
+    fileSize: Math.min(25 * 1024 * 1024, maxConfiguredBytes), // 25 MB max per announcement attachment
     files: 5,
   },
 });
-

@@ -4,7 +4,7 @@ export const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: '3.0.3',
     info: {
-      title: 'MSEC Teacher Management Dashboard & Academic ERP API (Phases 1–9)',
+      title: 'MSEC Teacher Management Dashboard & Academic ERP API (Complete Production Release — Phases 1–12)',
       version: '1.0.0',
       description:
         'Enterprise Educational ERP Backend REST API.\n\n' +
@@ -87,9 +87,28 @@ export const swaggerSpec = swaggerJsdoc({
       '/health': {
         get: {
           tags: ['System Health'],
-          summary: 'Health check endpoint',
+          summary: 'Service health check endpoint',
           security: [],
           responses: { '200': { description: 'Server is healthy' } },
+        },
+      },
+      '/health/live': {
+        get: {
+          tags: ['System Health'],
+          summary: 'Liveness probe verifying Node.js application process and memory metrics',
+          security: [],
+          responses: { '200': { description: 'Process is alive' } },
+        },
+      },
+      '/health/ready': {
+        get: {
+          tags: ['System Health'],
+          summary: 'Readiness probe verifying MongoDB, file storage, and AI provider readiness',
+          security: [],
+          responses: {
+            '200': { description: 'Dependencies are ready' },
+            '503': { description: 'One or more dependencies are unavailable' },
+          },
         },
       },
       '/auth/login': {
@@ -106,6 +125,35 @@ export const swaggerSpec = swaggerJsdoc({
             },
           },
           responses: { '200': { description: 'Login successful with tokens' } },
+        },
+      },
+      '/auth/refresh': {
+        post: {
+          tags: ['Phase 1: Authentication'],
+          summary: 'Rotate refresh token and issue new access/refresh token pair',
+          security: [],
+          responses: { '200': { description: 'Token pair rotated' } },
+        },
+      },
+      '/auth/logout': {
+        post: {
+          tags: ['Phase 1: Authentication'],
+          summary: 'Invalidate current device session',
+          responses: { '200': { description: 'Logged out of current session' } },
+        },
+      },
+      '/auth/logout-all': {
+        post: {
+          tags: ['Phase 1: Authentication'],
+          summary: 'Invalidate all active sessions across devices',
+          responses: { '200': { description: 'All sessions invalidated' } },
+        },
+      },
+      '/auth/sessions': {
+        get: {
+          tags: ['Phase 1: Authentication'],
+          summary: 'List active sessions for current user',
+          responses: { '200': { description: 'Active device sessions' } },
         },
       },
       '/auth/me': {
@@ -812,8 +860,222 @@ export const swaggerSpec = swaggerJsdoc({
           responses: { '200': { description: 'Substitution summary analytics' } },
         },
       },
+      '/ai/lesson-plan': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI draft lesson plan for an assigned subject/section',
+          responses: { '201': { description: 'AI lesson plan draft generated' } },
+        },
+      },
+      '/ai/quiz': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI draft quiz with answer key',
+          responses: { '201': { description: 'AI quiz draft generated' } },
+        },
+      },
+      '/ai/question-paper': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI draft examination question paper with marking scheme',
+          responses: { '201': { description: 'AI question paper draft generated' } },
+        },
+      },
+      '/ai/assignment': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI draft assignment problem set',
+          responses: { '201': { description: 'AI assignment draft generated' } },
+        },
+      },
+      '/ai/topic-explanation': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI draft topic explanation with worked examples',
+          responses: { '201': { description: 'AI topic explanation draft generated' } },
+        },
+      },
+      '/ai/rubric': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI evaluation rubric matrix',
+          responses: { '201': { description: 'AI rubric draft generated' } },
+        },
+      },
+      '/ai/study-material-summary': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Generate an AI summary of authorized study materials with prompt-injection & PII protection',
+          responses: { '201': { description: 'AI study material summary draft generated' } },
+        },
+      },
+      '/ai/content': {
+        get: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'List AI-generated drafts and reviewed content',
+          responses: { '200': { description: 'Paginated AI-generated content list' } },
+        },
+      },
+      '/ai/content/{id}': {
+        get: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Get AI-generated content details and revision history',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'AI content details' } },
+        },
+        patch: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Edit AI-generated content while preserving original generatedOutput in revisionHistory',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'AI content updated' } },
+        },
+        delete: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Delete an AI-generated content draft',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'AI content deleted' } },
+        },
+      },
+      '/ai/content/{id}/approve': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Approve AI-generated content and optionally convert to StudyMaterial or Assignment',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'AI content approved' } },
+        },
+      },
+      '/ai/content/{id}/reject': {
+        post: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Reject AI-generated content with review comments',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'AI content rejected' } },
+        },
+      },
+      '/ai/usage': {
+        get: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Get current user AI usage summary and remaining quota',
+          responses: { '200': { description: 'User AI usage summary' } },
+        },
+      },
+      '/ai/usage/analytics': {
+        get: {
+          tags: ['Phase 12: AI Teaching Assistant'],
+          summary: 'Get institution-wide AI usage analytics (Admin)',
+          responses: { '200': { description: 'Institution AI usage analytics' } },
+        },
+      },
+      '/dashboard/admin': {
+        get: {
+          tags: ['Phase 12: Role Dashboards'],
+          summary: 'Get aggregated Administrator Dashboard overview',
+          responses: { '200': { description: 'Admin dashboard data' } },
+        },
+      },
+      '/dashboard/teacher': {
+        get: {
+          tags: ['Phase 12: Role Dashboards'],
+          summary: 'Get aggregated Teacher Dashboard overview',
+          responses: { '200': { description: 'Teacher dashboard data' } },
+        },
+      },
+      '/dashboard/student': {
+        get: {
+          tags: ['Phase 12: Role Dashboards'],
+          summary: 'Get aggregated Student Dashboard overview (strictly hiding unpublished exam results)',
+          responses: { '200': { description: 'Student dashboard data' } },
+        },
+      },
+      '/dashboard/parent': {
+        get: {
+          tags: ['Phase 12: Role Dashboards'],
+          summary: 'Get aggregated Parent Dashboard overview for verified linked children',
+          responses: { '200': { description: 'Parent dashboard data' } },
+        },
+      },
+      '/analytics/overview': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get cross-module academic analytics overview',
+          responses: { '200': { description: 'Academic analytics overview' } },
+        },
+      },
+      '/analytics/attendance': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get centralized attendance analytics and shortage list',
+          responses: { '200': { description: 'Attendance analytics' } },
+        },
+      },
+      '/analytics/assignments': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get centralized assignment completion and evaluation analytics',
+          responses: { '200': { description: 'Assignments analytics' } },
+        },
+      },
+      '/analytics/examinations': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get centralized examination results, grade distribution, and topper/low-performer analysis',
+          responses: { '200': { description: 'Examinations analytics' } },
+        },
+      },
+      '/analytics/student-progress': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get centralized student progress and at-risk student analytics',
+          responses: { '200': { description: 'Student progress analytics' } },
+        },
+      },
+      '/reports/generate': {
+        post: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Generate an academic report job exported as PDF, Excel (.xlsx), or CSV',
+          responses: { '201': { description: 'Report generated' } },
+        },
+      },
+      '/reports': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'List generated report jobs',
+          responses: { '200': { description: 'Paginated report jobs' } },
+        },
+      },
+      '/reports/{id}': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get report job details',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Report job details' } },
+        },
+        delete: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Delete report job and remove exported file from storage',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Report job deleted' } },
+        },
+      },
+      '/reports/{id}/status': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Get report job processing status and expiry state',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Report job status' } },
+        },
+      },
+      '/reports/{id}/download': {
+        get: {
+          tags: ['Phase 12: Centralized Analytics & Reports'],
+          summary: 'Download exported report file (PDF, Excel, or CSV)',
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: { '200': { description: 'Binary report stream' } },
+        },
+      },
     },
   },
   apis: [],
 });
+
 

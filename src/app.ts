@@ -5,8 +5,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env.config';
 import { apiRouter } from './routes';
+import { HealthController } from './controllers/health.controller';
 import { errorHandler } from './middleware/error.middleware';
 import { generalRateLimiter } from './middleware/rateLimiter.middleware';
+import { securitySanitizerMiddleware } from './middleware/security.middleware';
 import { ApiError } from './utils/apiError';
 
 export const createApp = (): Application => {
@@ -29,13 +31,16 @@ export const createApp = (): Application => {
       origin: env.CORS_ORIGIN === '*' ? '*' : env.CORS_ORIGIN.split(','),
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
     })
   );
 
-  // Body parsers
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  // Body parsers with configurable payload limits
+  app.use(express.json({ limit: env.REQUEST_PAYLOAD_LIMIT }));
+  app.use(express.urlencoded({ extended: true, limit: env.REQUEST_PAYLOAD_LIMIT }));
+
+  // NoSQL injection, prototype pollution sanitization & defensive security headers
+  app.use(securitySanitizerMiddleware);
 
   // HTTP request logging
   if (env.NODE_ENV !== 'test') {
@@ -44,6 +49,11 @@ export const createApp = (): Application => {
 
   // Rate Limiting
   app.use(generalRateLimiter);
+
+  // Top-level Health, Liveness & Readiness Endpoints
+  app.get('/health', HealthController.getHealth);
+  app.get('/health/live', HealthController.getLiveness);
+  app.get('/health/ready', HealthController.getReadiness);
 
   const publicDir = path.join(process.cwd(), 'public');
 
@@ -61,6 +71,8 @@ export const createApp = (): Application => {
       docsEndpoint: '/api/v1/docs',
       openApiSpec: '/api/v1/openapi.json',
       healthEndpoint: '/api/v1/health',
+      livenessEndpoint: '/health/live',
+      readinessEndpoint: '/health/ready',
       timestamp: new Date().toISOString(),
     });
   });

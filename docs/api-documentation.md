@@ -611,3 +611,54 @@ Base URL: `http://localhost:5000/api/v1`
   - `GET /analytics/leave-summary`
   - `GET /analytics/substitution-summary`
 
+---
+
+## 11. AI Teaching Assistant, Reports & Dashboard APIs (Phase 12)
+
+### 11.1 AI Teaching Assistant Generation & Review Workflow
+- **Endpoints:**
+  - `POST /ai/lesson-plan`
+  - `POST /ai/quiz`
+  - `POST /ai/question-paper`
+  - `POST /ai/assignment`
+  - `POST /ai/topic-explanation`
+  - `POST /ai/rubric`
+  - `POST /ai/study-material-summary`
+  - `POST /ai/teaching-material`
+  - `POST /ai/learning-outcomes`
+  - `POST /ai/question-bank`
+  - `GET /ai/content`
+  - `GET /ai/content/:id`
+  - `PATCH /ai/content/:id` (Preserves immutable `generatedOutput` and appends to `revisionHistory`)
+  - `POST /ai/content/:id/approve` (Supports optional `convertToResource` into `StudyMaterial` or `Assignment`)
+  - `POST /ai/content/:id/reject`
+  - `DELETE /ai/content/:id`
+  - `GET /ai/usage`
+  - `GET /ai/usage/analytics` (Admin)
+  - `GET /ai/policies` (Admin)
+  - `POST /ai/policies` (Admin)
+
+### 11.2 Role-Based Dashboard Aggregation APIs
+- **Endpoints:**
+  - `GET /dashboard/admin`
+  - `GET /dashboard/teacher`
+  - `GET /dashboard/student`
+  - `GET /dashboard/parent`
+
+### 11.3 Centralized Analytics & Multi-Format Report Exports
+- **Analytics Endpoints:**
+  - `GET /analytics/overview`
+  - `GET /analytics/attendance`
+  - `GET /analytics/assignments`
+  - `GET /analytics/examinations`
+  - `GET /analytics/student-progress`
+  - `GET /analytics/teacher-workload`
+- **Report Job Endpoints (`pdf`, `excel`, `csv`):**
+  - `POST /reports/generate`
+  - `GET /reports`
+  - `GET /reports/:id`
+  - `GET /reports/:id/status`
+  - `GET /reports/:id/download`
+  - `DELETE /reports/:id`
+
+

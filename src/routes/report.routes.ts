@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ReportController } from '../controllers/report.controller';
+import { CentralReportController } from '../controllers/phase12.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/rbac.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
@@ -9,10 +10,17 @@ import {
   generateReportBodySchema,
   classReportParamSchema,
 } from '../validators/progress.validator';
+import {
+  generateReportJobSchema,
+  listReportJobsSchema,
+  reportJobIdParamSchema,
+} from '../validators/phase12.validator';
 
 const router = Router();
 
-// Student Progress Report (Students, Parents, Teachers, Admins)
+// ==========================================
+// Phase 6: Student & Class Progress Reports
+// ==========================================
 router.get(
   '/students/:studentId/progress',
   authenticate,
@@ -20,7 +28,6 @@ router.get(
   ReportController.getStudentProgressReport
 );
 
-// Explicit Generation with Snapshot Archiving
 router.post(
   '/students/:studentId/generate',
   authenticate,
@@ -29,7 +36,6 @@ router.post(
   ReportController.generateStudentProgressReport
 );
 
-// Class Section Progress Report (Teachers, Admins)
 router.get(
   '/class/:sectionId',
   authenticate,
@@ -38,5 +44,51 @@ router.get(
   ReportController.getClassProgressReport
 );
 
+// ==========================================
+// Phase 12: Centralized Report Generation & Export Jobs (PDF, Excel, CSV)
+// ==========================================
+router.post(
+  '/generate',
+  authenticate,
+  validateRequest(generateReportJobSchema),
+  CentralReportController.generateReport
+);
+
+router.get(
+  '/',
+  authenticate,
+  validateRequest(listReportJobsSchema),
+  CentralReportController.listReports
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  validateRequest(reportJobIdParamSchema),
+  CentralReportController.getReportById
+);
+
+router.get(
+  '/:id/status',
+  authenticate,
+  validateRequest(reportJobIdParamSchema),
+  CentralReportController.getReportStatus
+);
+
+router.get(
+  '/:id/download',
+  authenticate,
+  validateRequest(reportJobIdParamSchema),
+  CentralReportController.downloadReport
+);
+
+router.delete(
+  '/:id',
+  authenticate,
+  validateRequest(reportJobIdParamSchema),
+  CentralReportController.deleteReport
+);
+
 export const reportRouter = router;
 export default router;
+

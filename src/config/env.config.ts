@@ -120,6 +120,61 @@ const envSchema = z.object({
       .default('500')
       .transform((val) => parseInt(val, 10))
   ),
+  // Phase 12: AI Teaching Assistant & Report Generation Configuration
+  GEMINI_API_KEY: emptyToUndefined(z.string().optional()),
+  AI_PROVIDER: emptyToUndefined(
+    z.enum(['gemini', 'fallback', 'custom']).default('gemini')
+  ),
+  AI_MODEL: emptyToUndefined(z.string().default('gemini-3.8-flash')),
+  AI_REQUEST_TIMEOUT_MS: emptyToUndefined(
+    z
+      .string()
+      .default('15000')
+      .transform((val) => parseInt(val, 10))
+  ),
+  AI_MAX_RETRIES: emptyToUndefined(
+    z
+      .string()
+      .default('2')
+      .transform((val) => parseInt(val, 10))
+  ),
+  AI_DAILY_REQUEST_LIMIT_TEACHER: emptyToUndefined(
+    z
+      .string()
+      .default('50')
+      .transform((val) => parseInt(val, 10))
+  ),
+  AI_DAILY_REQUEST_LIMIT_ADMIN: emptyToUndefined(
+    z
+      .string()
+      .default('200')
+      .transform((val) => parseInt(val, 10))
+  ),
+  AI_MONTHLY_TOKEN_LIMIT: emptyToUndefined(
+    z
+      .string()
+      .default('500000')
+      .transform((val) => parseInt(val, 10))
+  ),
+  REPORT_EXPIRY_HOURS: emptyToUndefined(
+    z
+      .string()
+      .default('168')
+      .transform((val) => parseInt(val, 10))
+  ),
+  REPORT_ASYNC_ROW_THRESHOLD: emptyToUndefined(
+    z
+      .string()
+      .default('500')
+      .transform((val) => parseInt(val, 10))
+  ),
+  REQUEST_PAYLOAD_LIMIT: emptyToUndefined(z.string().default('10mb')),
+  MAX_FILE_UPLOAD_SIZE_MB: emptyToUndefined(
+    z
+      .string()
+      .default('50')
+      .transform((val) => parseInt(val, 10))
+  ),
 });
 
 const rawEnv = {

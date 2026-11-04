@@ -36,4 +36,8 @@ export * from './parentCommunication.model';
 export * from './parentCommunicationMessage.model';
 export * from './leavePolicy.model';
 export * from './substitution.model';
+export * from './aiGeneratedContent.model';
+export * from './aiUsage.model';
+export * from './reportJob.model';
+
 

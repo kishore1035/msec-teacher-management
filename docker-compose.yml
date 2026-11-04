@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: msec-erp-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://mongodb:27017/teacher_management_db
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-msec-local-compose-jwt-access-secret-2026}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-msec-local-compose-jwt-refresh-secret-2026}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CORS_ORIGIN: "*"
+      LOG_LEVEL: info
+      AI_PROVIDER: ${AI_PROVIDER:-gemini}
+      AI_MODEL: ${AI_MODEL:-gemini-3.8-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health/ready"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+
+  mongodb:
+    image: mongo:7.0
+    container_name: msec-erp-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
+  uploads_data:

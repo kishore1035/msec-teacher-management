@@ -11,8 +11,48 @@ import {
   teacherInsightsQuerySchema,
 } from '../validators/progress.validator';
 import { workloadAnalyticsQuerySchema } from '../validators/leaveSubstitutionTeacher.validator';
+import { CentralAnalyticsController } from '../controllers/phase12.controller';
+import { analyticsFilterQuerySchema } from '../validators/phase12.validator';
 
 const router = Router();
+
+// ==========================================
+// Phase 12: Centralized Institutional & Academic Analytics
+// ==========================================
+router.get(
+  '/overview',
+  authenticate,
+  validateRequest(analyticsFilterQuerySchema),
+  CentralAnalyticsController.getOverview
+);
+
+router.get(
+  '/attendance',
+  authenticate,
+  validateRequest(analyticsFilterQuerySchema),
+  CentralAnalyticsController.getAttendance
+);
+
+router.get(
+  '/assignments',
+  authenticate,
+  validateRequest(analyticsFilterQuerySchema),
+  CentralAnalyticsController.getAssignments
+);
+
+router.get(
+  '/examinations',
+  authenticate,
+  validateRequest(analyticsFilterQuerySchema),
+  CentralAnalyticsController.getExaminations
+);
+
+router.get(
+  '/student-progress',
+  authenticate,
+  validateRequest(analyticsFilterQuerySchema),
+  CentralAnalyticsController.getStudentProgress
+);
 
 // ==========================================
 // Class Analytics

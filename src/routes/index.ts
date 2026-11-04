@@ -30,18 +30,17 @@ import { parentRouter } from './parent.routes';
 import { parentCommunicationRouter } from './parentCommunication.routes';
 import { leaveRequestRouter, leaveRouter } from './leave.routes';
 import { substitutionRouter } from './substitution.routes';
+import { aiRouter } from './ai.routes';
+import { dashboardRouter } from './dashboard.routes';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from '../config/swagger.config';
+import { HealthController } from '../controllers/health.controller';
 
 const router = Router();
 
-router.get('/health', (_req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
+router.get('/health', HealthController.getHealth);
+router.get('/health/live', HealthController.getLiveness);
+router.get('/health/ready', HealthController.getReadiness);
 
 router.get('/openapi.json', (_req, res) => {
   res.status(200).json(swaggerSpec);
@@ -81,7 +80,10 @@ router.use('/parent-communications', parentCommunicationRouter);
 router.use('/leave-requests', leaveRequestRouter);
 router.use('/leaves', leaveRouter);
 router.use('/substitutions', substitutionRouter);
+router.use('/ai', aiRouter);
+router.use('/dashboard', dashboardRouter);
 
 export const apiRouter = router;
+
 
 

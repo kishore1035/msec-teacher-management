@@ -57,6 +57,7 @@ src/
 | **Phase 9** | Announcements & Notifications Management | `Announcement`, `Notification`, `NotificationPreference`, `NotificationDevice` | `/api/v1/announcements/*`, `/api/v1/notifications/*` |
 | **Phase 10** | Doubt Management & Parent Communication | `Doubt`, `DoubtMessage`, `Parent`, `ParentCommunication`, `ParentCommunicationMessage` | `/api/v1/doubts/*`, `/api/v1/parents/*`, `/api/v1/parent-communications/*` |
 | **Phase 11** | Leave, Substitution & Teacher Management | `Teacher`, `TeacherLeave` (`LeaveRequest`), `LeavePolicy`, `Substitution` | `/api/v1/teachers/*`, `/api/v1/leave-requests/*`, `/api/v1/leaves/*`, `/api/v1/substitutions/*`, `/api/v1/analytics/*` |
+| **Phase 12** | AI Teaching Assistant, Reports & Dashboard APIs | `AIGeneratedContent`, `AIUsageLog`, `AIUsagePolicy`, `ReportJob` | `/api/v1/ai/*`, `/api/v1/dashboard/*`, `/api/v1/analytics/*`, `/api/v1/reports/*` |
 
 ---
 
@@ -188,7 +189,17 @@ Attendance percentage is calculated dynamically based on the active `AttendanceP
 
 ---
 
-## 13. Development & Testing Commands
+## 13. AI Teaching Assistant, Dashboards & Report Export Invariants
+
+- **Provider-Independent AI Architecture (`IAIProvider`):** Supports Google Gemini (`@google/genai` with `gemini-3.8-flash`) and deterministic/custom providers via `AIProviderRegistry` with request timeouts, exponential backoff retries, and configurable `AIUsagePolicy` daily/monthly quotas.
+- **Draft-First & Mandatory Faculty Review:** All AI-generated teaching resources (`lesson_plan`, `quiz`, `question_paper`, `assignment`, `topic_explanation`, `rubric`, `study_material_summary`, `teaching_material`, `learning_outcomes`, `question_bank`) are saved as `reviewStatus: 'draft'`. Original `generatedOutput` is immutable, and every teacher edit appends a versioned entry to `revisionHistory`.
+- **Prompt Injection Defense & PII Redaction:** Student PII (USNs, roll numbers, emails, phone numbers) is automatically redacted via `AISecuritySanitizer` before prompts leave the server. Uploaded study material excerpts are wrapped in `<untrusted_reference_data>` delimiters and stripped of prompt-injection directives.
+- **Role-Isolated Dashboards & Confidentiality:** `/api/v1/dashboard/admin`, `/teacher`, `/student`, and `/parent` aggregate live operational records across Phases 1–11 while strictly hiding unpublished examination results (`evaluationStatus !== 'published'`) and draft assignments from students and parents.
+- **Multi-Format Report Jobs (`PDF`, `Excel`, `CSV`):** Report exports (`ReportJob`) persist generated files on disk via `LocalStorageService` (`uploads/reports/`), track lifecycle states (`queued`, `processing`, `completed`, `failed`, `expired`), enforce RBAC on downloads, and automatically clean up expired report files.
+
+---
+
+## 14. Development & Testing Commands
 
 ```bash
 # Install dependencies
@@ -210,9 +221,10 @@ npm start
 
 ---
 
-## 14. Contribution Standards for Future Phases
+## 15. Contribution Standards for Future Phases
 
 1. **Test-Driven:** Before adding a feature, add automated integration test assertions in `tests/integration/`.
-2. **Zero Breaking Changes:** Never break Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, Phase 8, Phase 9, Phase 10, or Phase 11 endpoints.
+2. **Zero Breaking Changes:** Never break Phase 1 through Phase 12 endpoints.
 3. **No UI / Frontend:** Keep this repository strictly focused on the backend REST API.
+
 
